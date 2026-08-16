@@ -2,3 +2,5 @@ streamlit
 torch
 torchvision
 pillow
+plotly
+gdown

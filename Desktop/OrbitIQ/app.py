@@ -5,6 +5,8 @@ from torchvision import transforms, models
 from PIL import Image
 import plotly.graph_objects as go
 import numpy as np
+import gdown 
+import os
 
 st.set_page_config(page_title="OrbitIQ", page_icon="🌊", layout="wide")
 
@@ -57,24 +59,32 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# HEADER - Pic 1 ka style
+# HEADER
 st.markdown("""
 <div class="header-box">
     <h1 style='font-size: 48px;'>🌊 Flood Disaster Detection</h1>
     <p style='font-size: 18px; color: #a0d2eb;'>AI Powered Real-time Flood Analysis | OrbitIQ</p>
-    <button style='background: #00d4ff; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold;'> Analyze Now</button>
 </div>
 """, unsafe_allow_html=True)
 
 @st.cache_resource
 def load_model():
+    MODEL_PATH = "flood_image_model.pth"
+    # TUMHARA DRIVE LINK
+    DRIVE_LINK = "https://drive.google.com/uc?id=12BeUXSPNuIQ6xoqlkI2ASM444bIaOrnG"
+    
+    # Agar model nahi hai to Drive se download karo
+    if not os.path.exists(MODEL_PATH):
+        with st.spinner("🌊 Model download ho raha hai... Pehli baar 20-30 sec lagega"):
+            gdown.download(DRIVE_LINK, MODEL_PATH, quiet=False)
+
     model = models.resnet18(weights=None)
     num_ftrs = model.fc.in_features
     model.fc = nn.Sequential(
         nn.Linear(num_ftrs, 128), nn.ReLU(), nn.Dropout(0.3),
         nn.Linear(128, 1), nn.Sigmoid()
     )
-    model.load_state_dict(torch.load('flood_image_model.pth', map_location=DEVICE))
+    model.load_state_dict(torch.load(MODEL_PATH, map_location=DEVICE))
     model = model.to(DEVICE)
     model.eval()
     return model
@@ -97,7 +107,7 @@ def predict(image):
     else:
         return "NO FLOOD", prob * 100, prob
 
-# 3 COLUMN DASHBOARD - Pic 2 ka style
+# 3 COLUMN DASHBOARD
 col1, col2, col3 = st.columns([1, 1.5, 1])
 
 with col1:
@@ -139,7 +149,6 @@ st.subheader("📈 Analytics Dashboard")
 g1, g2 = st.columns(2)
 
 with g1:
-    # Line Graph - Water Level Trend
     months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun']
     water_level = [20, 35, 30, 50, 45, 70]
     fig1 = go.Figure()
@@ -152,16 +161,15 @@ with g1:
     st.plotly_chart(fig1, use_container_width=True)
 
 with g2:
-        # Bar Graph - Risk Assessment
-        areas = ['Area A', 'Area B', 'Area C', 'Area D']
-        risk = [30, 80, 45, 60]
-        fig2 = go.Figure()
-        fig2.add_trace(go.Bar(x=areas, y=risk, marker_color=['#96c93d','#ff416c','#00d4ff','#ff4b2b']))
-        fig2.update_layout(title="Flood Risk by Area",
-                            font=dict(size=14, color='white') ,
-                                                                        template="plotly_dark",
-                            paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
-        st.plotly_chart(fig2, use_container_width=True)
+    areas = ['Area A', 'Area B', 'Area C', 'Area D']
+    risk = [30, 80, 45, 60]
+    fig2 = go.Figure()
+    fig2.add_trace(go.Bar(x=areas, y=risk, marker_color=['#96c93d','#ff416c','#00d4ff','#ff4b2b']))
+    fig2.update_layout(title="Flood Risk by Area",
+                        font=dict(size=14, color='white') ,
+                        template="plotly_dark",
+                        paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
+    st.plotly_chart(fig2, use_container_width=True)
 
 st.markdown('</div>', unsafe_allow_html=True)
 
