@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+venv/
+__pycache__/
+*.pyc
+
+# Env
+.env
+.env.local
+*.pem
+*.key
+
+# Build
+dist/
+build/
+.next/
+*.egg-info/
+
+# OS/editor
+.DS_Store
+.vscode/
+.idea/
+
+# Logs
+*.log
+npm-debug.log*
